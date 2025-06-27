@@ -1,0 +1,651 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./output.css" rel="stylesheet">
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <script src="./script.js" defer></script>
+  <style>
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+    .modal-content {
+      background-color: white;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #4CAF50;
+      color: white;
+      padding: 15px;
+      border-radius: 5px;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      border-bottom: 1px solid #ddd;
+      background-color: #f9f9f9;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    .cart-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      background-color: white;
+      padding: 5px;
+      border-radius: 5px;
+    }
+    .remove-btn {
+      background-color: #ff4444;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .remove-btn:hover {
+      background-color: #cc0000;
+    }
+    #cartTotal {
+      font-size: 1.5rem;
+      color: #960002;
+      margin: 20px 0;
+      text-align: right;
+    }
+    /* Slide-in animation for order modal */
+    #orderModal .modal-content {
+      transform: translateX(100%);
+      opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    #orderModal.show .modal-content {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    .preloader {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100vw; height: 100vh;
+      background: linear-gradient(135deg, #960002 60%, #ffd700 100%);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 2rem;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      box-shadow: 0 0 40px 10px rgba(0,0,0,0.15);
+      transition: opacity 0.5s;
+    }
+    .preloader.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .loader-spinner {
+      border: 8px solid #fff;
+      border-top: 8px solid #ffd700;
+      border-radius: 50%;
+      width: 70px;
+      height: 70px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 24px 0 rgba(0,0,0,0.12);
+    }
+    .preloader-icon {
+      font-size: 3.5rem;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 2px 8px #96000288);
+      animation: pop 1.2s cubic-bezier(.68,-0.55,.27,1.55) infinite alternate;
+    }
+    @keyframes pop {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.12); }
+    }
+    .preloader-text {
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 8px #96000255;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .preloader-dots {
+      display: inline-block;
+      font-size: 2.2rem;
+      letter-spacing: 2px;
+      animation: dots 1.2s steps(3, end) infinite;
+      color: #ffd700;
+      font-weight: bold;
+    }
+    @keyframes dots {
+      0%, 20% { content: ''; }
+      40% { content: '.'; }
+      60% { content: '..'; }
+      80%, 100% { content: '...'; }
+    }
+    
+    /* Responsive styles - only for mobile and tablet */
+    @media (max-width: 1024px) {
+      .nav-links {
+        gap: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+      }
+      
+      .main-content {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        margin: 10px 0;
+      }
+      
+      .product-grid {
+        grid-template-columns: repeat(1, 1fr);
+        gap: 15px;
+        padding: 10px;
+      }
+      
+      .cart-item {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .cart-item img {
+        width: 100%;
+        max-width: 150px;
+      }
+      
+      .modal-content {
+        width: 95%;
+        margin: 10% auto;
+      }
+
+      .back-to-top img {
+        width: 100px;
+      }
+
+      footer img {
+        width: 250px;
+      }
+
+      footer p {
+        font-size: 14px;
+      }
+
+      footer img.contact-icon {
+        width: 30px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .logo-section img {
+        width: 200px;
+      }
+      
+    }
+
+    /* Product box styling */
+    .product-box {
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background: white;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .product-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    }
+
+    .product-box img {
+      border-radius: 15px 15px 0 0;
+      transition: transform 0.3s ease;
+    }
+
+    .product-box:hover img {
+      transform: scale(1.05);
+    }
+
+    .product-info {
+      padding: 15px;
+      border-radius: 0 0 15px 15px;
+    }
+
+    .product-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .product-price {
+      color: #960002;
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+
+    .add-to-cart-btn {
+      background-color: #960002;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .add-to-cart-btn:hover {
+      background-color: #7a0002;
+    }
+
+    /* Receipt modal specific: fixed size, always fits in one screen, content scrolls inside */
+    #receiptModal .modal-content {
+      width: 95vw;
+      max-width: 500px;
+      height: 90vh;
+      max-height: 98vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 10px 8px;
+      font-size: 0.97rem;
+    }
+    #receiptModal .modal-content h2,
+    #receiptModal .modal-content h3 {
+      margin-bottom: 6px;
+      font-size: 1.1rem;
+    }
+    #receiptModal .modal-content .mb-4,
+    #receiptModal .modal-content .mb-2 {
+      margin-bottom: 6px !important;
+    }
+    #receiptModal .modal-content .mt-6,
+    #receiptModal .modal-content .mt-4 {
+      margin-top: 8px !important;
+    }
+    #receiptModal .modal-content .p-4 {
+      padding: 6px !important;
+    }
+    #receiptModal .modal-content .text-xl {
+      font-size: 1.05rem !important;
+    }
+    #receiptModal .modal-content .text-lg {
+      font-size: 1rem !important;
+    }
+    #receiptModal .modal-content .w-16 {
+      width: 38px !important;
+      height: 38px !important;
+    }
+    @media (max-width: 600px) {
+      #receiptModal .modal-content {
+        width: 99vw;
+        height: 98vh;
+        max-width: 99vw;
+        max-height: 98vh;
+        padding: 4px 2px;
+        font-size: 0.93rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      /* Footer responsive */
+      footer .flex-row {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+        align-items: center !important;
+      }
+      footer img[alt='logo'] {
+        width: 140px !important;
+        min-width: 80px !important;
+        margin: 8px 0 !important;
+      }
+      footer .mr-4, footer .ml-4 {
+        margin: 0 !important;
+      }
+      footer .flex-col {
+        margin-bottom: 4px;
+        align-items: center !important;
+      }
+      footer p, footer span, footer .contact-icon {
+        text-align: center !important;
+        justify-content: center !important;
+      }
+      /* Header responsive */
+      header section.flex, header .flex {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 8px !important;
+      }
+      header .nav-links {
+        flex-direction: column !important;
+        gap: 10px !important;
+        padding: 10px !important;
+      }
+      header input[type='search'] {
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+      header img {
+        max-width: 90vw !important;
+        height: auto !important;
+      }
+    }
+  </style>
+</head>
+<body  class="bg-amber-50">
+  <div id="preloader" class="preloader">
+    <div class="preloader-icon">🛍️</div>
+    <div class="loader-spinner"></div>
+    <div class="preloader-text">Welcome to E-Commerce <span class="preloader-dots">...</span></div>
+  </div>
+  
+    <header class="bg-[#960002] text-[#fff]" id="header">
+        <section class="flex flex-wrap justify-center">
+             <h2>⚠️Important Note:</h2>&nbsp;&nbsp;&nbsp;
+            <div class="flex bg-[#e32629]" style="display: grid; grid-template-columns: auto auto;">
+                <p>✅ Payment ya products return/exchange nahi hoga kisi surat mein.</p>
+                <p>🚚 Home delivery sirf Manzoor Colony & Mehmoodabad Karachi-Pakistan and nearest areas per Available ha📍</p>
+            </div>
+        </section>
+
+        <!-- Main Header Section: Logo, Search, Contact, Cart -->
+        <section class="flex flex-col lg:flex-row justify-between items-center py-4 px-4 lg:ml-[50px] lg:mr-[150px]">
+            <!-- Line 1 for Mobile: Logo and Search Bar -->
+            <div class="flex flex-col sm:flex-row items-center justify-center w-full lg:w-auto mb-4 lg:mb-0">
+                <div class="flex items-center mb-2 sm:mb-0 sm:mr-4">
+                    <img src="./logo & icons/IB E-Commerce Logo.png" alt="Main-Logo" class="w-[200px] sm:w-[250px] lg:w-[350px]">
+                    <!-- <p id="sincemari" class="text-xs sm:text-sm lg:text-base ml-2">since 2007</p> -->
+                </div>
+                <div class="relative flex items-center w-full max-w-xs sm:max-w-[288px]">
+                    <input type="search" id="searchInput" name="Value" placeholder="Search entire store here..." class="border-2 rounded-b-sm text-[#1e1d1d] w-full bg-[#fff] p-2 pr-10">
+                    <img src="./logo & icons/search icon.png" alt="Search Icon" class="absolute right-2 w-6 h-6">
+                </div>
+            </div>
+
+            <!-- Line 2 for Mobile: Contact and Cart Button -->
+            <div class="flex items-center justify-center gap-4 w-full lg:w-auto">
+                <label class="flex items-center">
+                    <img src="./logo & icons/contact icon.png" alt="contact-logo" class="w-[30px] sm:w-[40px] lg:w-[50px]">
+                    <p class="text-sm sm:text-base">0335-9903399</p>
+                </label>
+                <button onclick="showCart()" class="bg-yellow-400 text-blue-950 px-4 py-2 rounded hover:bg-yellow-500 relative text-sm sm:text-base">
+                    🛒 Cart <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-sm">0</span>
+                </button>
+            </div>
+        </section>
+
+        <section class="border-b-[6px] border-gray-500">
+            <nav>
+                <ul class="flex flex-wrap justify-center gap-[50px] nav-links">
+                    <a href="index.html" class="hover:bg-[yellow] hover:text-blue-950 hover:rounded-[15%] hover:scale-115">Home Page</a>
+                </ul>
+            </nav>
+        </section>
+    </header>
+
+    <!-- Main Work Start -->
+
+    <main> 
+
+        <section class="flex">
+
+        <aside class="w-[15%] bg-[#fff] shadow-xl p-4 rounded-2xl m-[20px] sidebar md:block hidden">
+            <h1 class="text-4xl underline mb-[5px]">Products</h1>
+             <br>
+
+            <h3 class="text-lg font-semibold mb-1 flex items-center justify-between" style="display: flex; align-items: center; justify-content: space-between;">Products
+                <!-- <a href="http://ibonlinestore.netlify.app/" target="_blank" style="font-size: 0.85rem; color: #007bff; text-decoration: underline; margin-left: 8px;">@http://ibonlinestore.netlify.app/</a> -->
+            </h3>
+
+            <ul>
+                <li class="mb-[5px]">✅ Premium Quality Products</li>
+                <li class="mb-[5px]">🛍️ Stylish & Trendy Designs</li>
+                <li class="mb-[5px]">💰 Affordable Prices</li>
+                <li class="mb-[5px]">🧵 Comfort Guaranteed</li>
+                <li class="mb-[5px]">📦 Fast & Reliable Delivery</li>
+                <li class="mb-[5px]">🔄 Easy Exchange Policy</li>
+                <li class="mb-[5px]">📞 24/7 Customer Support</li>
+                <li class="mb-[5px]">💯 Trusted by Hundreds</li>
+            </ul>
+            <br>
+            <br>
+
+            <h1 class="text-4xl mb-[5px] underline" >Types</h1>
+            <ul>
+                <li class="mb-[5px]">🎨 Latest Designs </li>
+                <li class="mb-[5px]">🧵 High-Quality Fabric </li>
+                <li class="mb-[5px]">💰 Budget-Friendly</li>
+            </ul>
+        </aside>
+        
+        <div class="w-[85%]">
+            <div>
+                <h2 class="text-center text-sm md:text-xl lg:text-4xl mt-[20px]">🛒 "Style That Speaks – Shop Smart, Wear Smart."</h2>
+            </div>
+
+            <section id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-[60px] product-grid">
+                <!-- Product cards will be dynamically added here -->
+            </section>
+        </div>
+
+        </section>
+
+    </main>
+
+<!-- Back to Top -->
+<div class="flex justify-end back-to-top">
+    <a href="#header"><img src="./logo & icons/back to top.png" class="w-[150px]" alt="Back to top icon"></a>
+</div>
+
+<br/>
+
+<footer class="bg-[#960002] text-[#fff]" style="min-height: 110px; display: flex; flex-direction: row; align-items: center; justify-content: center;">
+    <div class="flex flex-row items-center justify-center gap-8 w-full">
+        <div class="flex flex-col items-center mr-4">
+            <img src="./logo & icons/My pic.png" alt="Store Owner" style="width: 90px; height: 90px; object-fit: cover; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 8px #0002;" />
+            <span style="font-size: 0.95rem; color: #ffd700; margin-top: 4px;">Store Owner</span>
+        </div>
+        <img src="./logo & icons/IB E-Commerce Logo.png" alt="logo" style="width: 220px; max-width: 40vw; min-width: 120px; margin: 0 24px;" />
+        <div class="flex flex-col items-center ml-4">
+            <p class="flex items-center justify-center mb-1">
+                <img src="./logo & icons/contact icon.png" style="width: 38px; height: 38px; margin-right: 8px;" alt="contact icon">
+                <span style="font-size: 1.1rem;">Contact: 0335-9903399</span>
+            </p>
+        </div>
+    </div>
+</footer>
+
+<!-- Add this before the closing body tag -->
+<div id="cartModal" class="modal">
+    <div class="modal-content">
+        <h2 class="text-2xl font-bold mb-4">Shopping Cart</h2>
+        <div id="cartItems"></div>
+        <p id="cartTotal" class="text-xl font-bold mt-4"></p>
+        <div class="flex justify-between mt-4">
+            <button onclick="hideCart()" class="bg-gray-500 text-white px-4 py-2 rounded">Close</button>
+            <button onclick="showOrderForm()" class="bg-green-500 text-white px-4 py-2 rounded">Proceed to Order</button>
+        </div>
+    </div>
+</div>
+
+<div id="orderModal" class="modal">
+    <div class="modal-content">
+        <div class="flex justify-between items-start mb-6">
+            <h2 class="text-2xl font-bold">Complete Your Order</h2>
+            <button onclick="hideOrderForm()" class="text-gray-500 hover:text-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+            <h3 class="text-lg font-semibold mb-2">Order Summary</h3>
+            <div id="orderSummary" class="text-gray-600"></div>
+            <p class="text-xl font-bold text-[#960002] mt-2" id="orderTotal"></p>
+        </div>
+
+        <form oninput="checkOrderFormFields()" onsubmit="submitOrder(event)" class="space-y-4">
+            <div>
+                <label class="block text-gray-700 font-medium mb-2">Full Name</label>
+                <input type="text" id="customerName" required 
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:border-[#960002] focus:ring-1 focus:ring-[#960002] outline-none"
+                    placeholder="Enter your full name">
+            </div>
+            <div>
+                <label class="block text-gray-700 font-medium mb-2">Phone Number</label>
+                <input type="tel" id="customerPhone" required 
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:border-[#960002] focus:ring-1 focus:ring-[#960002] outline-none"
+                    placeholder="Enter your phone number"
+                    maxlength="11"
+                    value="03"
+                >
+            </div>
+            <div>
+                <label class="block text-gray-700 font-medium mb-2">Delivery Address</label>
+                <textarea id="customerAddress" required 
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:border-[#960002] focus:ring-1 focus:ring-[#960002] outline-none"
+                    rows="3" placeholder="Enter your complete delivery address"></textarea>
+            </div>
+            <div style="color: red;">
+                <h1><b>Important Note</b></h1>
+                <label class="block text-gray-700 font-medium mb-2" style="color: red;">
+                    Take a screenshot of the order recipt and send it to my WhatsApp. You will receive the order, but the payment must be sent to Easypaisa first. The Easypaisa number is 03702789462.
+                </label>
+            </div>
+            <div class="flex justify-end gap-4 mt-6">
+                <button type="button" onclick="hideOrderForm()" 
+                    class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" id="placeOrderBtn" disabled
+                    class="px-6 py-3 bg-[#960002] text-white rounded-lg hover:bg-[#7a0002] transition-colors">
+                    Place Order
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Custom Confirmation Modal -->
+<div id="confirmationModal" class="modal">
+    <div class="modal-content">
+        <h2 class="text-2xl font-bold mb-4" id="confirmationTitle">Confirm Action</h2>
+        <p class="mb-6" id="confirmationMessage"></p>
+        <div class="flex justify-end gap-4">
+            <button onclick="hideConfirmation()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">Cancel</button>
+            <button onclick="confirmAction()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Product Details Modal -->
+<div id="productDetailsModal" class="modal">
+    <div class="modal-content">
+        <div class="flex justify-between items-start mb-4">
+            <h2 class="text-xl md:text-2xl font-bold" id="productTitle">Product Details</h2>
+            <button onclick="hideProductDetails()" class="text-gray-500 hover:text-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="flex flex-col md:flex-row gap-6">
+            <div class="w-full md:w-1/2">
+                <img id="productImage" src="" alt="Product Image" class="w-full h-auto rounded-lg shadow-lg">
+            </div>
+            <div class="w-full md:w-1/2">
+                <div class="mb-4">
+                    <h3 class="text-lg md:text-xl font-semibold mb-2">Price</h3>
+                    <p id="productPrice" class="text-xl md:text-2xl text-[#960002] font-bold"></p>
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-lg md:text-xl font-semibold mb-2">Description</h3>
+                    <p id="productDescription" class="text-gray-600 text-sm md:text-base"></p>
+                </div>
+                <div class="mt-6">
+                    <button onclick="confirmAddToCart()" class="w-full bg-[#960002] text-white px-4 md:px-6 py-2 md:py-3 rounded-lg hover:bg-[#7a0002] transition-colors text-sm md:text-base">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="receiptModal" class="modal">
+    <div class="modal-content">
+        <div class="flex justify-between items-start mb-4">
+            <h2 class="text-2xl font-bold">Order Receipt</h2>
+            <div class="flex items-center gap-2">
+                <a href="http://ibonlinestore.netlify.app/" target="_blank" title="Visit IB Online Store">
+                    <img src="./logo & icons/IB E-Commerce Logo.png" alt="IBonlineStore Logo" style="height: 40px; width: auto; border-radius: 6px; box-shadow: 0 1px 4px #0001; display: inline-block; vertical-align: middle;" />
+                </a>
+                <button onclick="hideReceipt()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div id="receiptContent">
+            <h3 class="text-lg font-semibold mb-1 flex items-center justify-between" style="display: flex; align-items: center; justify-content: space-between;">Products
+                <a href="http://ibonlinestore.netlify.app/" target="_blank" style="font-size: 0.85rem; color: #007bff; text-decoration: underline; margin-left: 8px;">@http://ibonlinestore.netlify.app/</a>
+            </h3>
+            <!-- Receipt details will be injected here by JS -->
+        </div>
+        <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-300">
+            <p class="text-base md:text-lg font-semibold mb-2">🚚 Home delivery sirf Manzoor Colony & Mehmoodabad Karachi-Pakistan and nearest areas per Available ha📍</p>
+        </div>
+        <div class="mt-4 text-center text-green-700 font-bold" id="receiptNameLine">
+            <!-- Name-based message will be injected by JS -->
+        </div>
+    </div>
+</div>
+
+<script>
+function checkOrderFormFields() {
+    var name = document.getElementById('customerName').value.trim();
+    var phone = document.getElementById('customerPhone').value.trim();
+    var address = document.getElementById('customerAddress').value.trim();
+    var btn = document.getElementById('placeOrderBtn');
+    btn.disabled = !(name && phone.length === 11 && address);
+}
+</script>
+</body>
+</html>
