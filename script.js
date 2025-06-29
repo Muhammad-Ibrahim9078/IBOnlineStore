@@ -312,10 +312,10 @@ function showReceipt(formData, cartItems) {
         moreMsg = `<div class='text-xs text-gray-500 mt-1' style='text-align:center;'>+${cartItems.length - maxShow} more items...</div>`;
     }
     receiptContent.innerHTML = `
-        <div class='text-xs text-center mb-2' style='color:#d90429;font-weight:bold;'>Take a screen shot and send on my WhatsApp number 0335-9903399 and first payment on My Easy Paisa Number 03702789462</div>
+        <div class='text-xs text-center mb-2' style='color:#d90429;font-weight:bold;'>Take a screen shot and send on my WhatsApp number 0370-2789462</div>
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
             <span class="text-lg font-semibold">Products</span>
-            <a href="http://ibonlinestore.netlify.app/" target="_blank" style="font-size: 0.85rem; color: #007bff; text-decoration: underline; margin-left: 8px;">@http://ibonlinestore.netlify.app/</a>
+            <span style="color: #007bff; font-size: 0.95rem; margin-left: 8px;">IBOnlineStore: http://ibonlinestore.netlify.app/</span>
         </div>
         <div style=\"display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 4px;\">${itemsHtml}</div>
         ${moreMsg}
@@ -333,9 +333,9 @@ function showReceipt(formData, cartItems) {
     const nameLine = document.getElementById('receiptNameLine');
     if (nameLine) {
         if (formData.name && formData.name.trim().length > 0) {
-            nameLine.innerHTML = `${formData.name}, receipt ka screenshot le kar WhatsApp par send kar dein! <br> <span class='text-blue-700'>0335-9903399</span>`;
+            nameLine.innerHTML = `${formData.name}, receipt ka screenshot le kar WhatsApp par send kar dein! <br> <span class='text-blue-700'>0370-2789462</span>`;
         } else {
-            nameLine.innerHTML = `Receipt ka screenshot le kar WhatsApp par send kar dein! <br> <span class='text-blue-700'>0335-9903399</span>`;
+            nameLine.innerHTML = `Receipt ka screenshot le kar WhatsApp par send kar dein! <br> <span class='text-blue-700'>0370-2789462</span>`;
         }
     }
 }
